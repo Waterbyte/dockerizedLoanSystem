@@ -1,15 +1,26 @@
+
+from flask import Flask,jsonify
 from flask_restful import Api
+from backendAPI import routes
+from backendAPI import db
 
-app = Flask(__name__, static_folder="static")
+app = Flask(__name__)
 
-
-
-@parser.error_handler
-def handle_error(err, req, schema, status_code, headers):
-    raise FmfException(json.dumps(err.messages))
 
 db.init_app(app)
 api = Api(app)
 
-from fyndster_b import routes, db, util
+# Return validation errors as JSON
+@app.errorhandler(400)
+def handle_error(err):
+    headers = err.data.get("headers", None)
+    messages = err.data.get("messages", ["Invalid request."])
+    if headers:
+        return jsonify({"errors": messages}), err.code, headers
+    else:
+        return jsonify({"errors": messages}), err.code
 
+api.add_resource(routes.Login,'/login')
+
+if __name__ == '__main__':
+    app.run(debug=True)
