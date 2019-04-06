@@ -5,12 +5,22 @@ class misc_webargs(Enum):
     PASSWORD = 2
     TOKEN = 3
     ROLE = 4
-    REFERRER = 5
+    REFERRER_USERNAME = 5
+    REFERRER_TOKEN = 6
+    TIMESTAMP=7
+    AGENT_NAME = 8
+    CUSTOMER_NAME = 9
 
 class response(Enum):
     VERDICT = 101
+    PAYLOAD = 102
 
 class collectionName(Enum):
-    user = 1
-    relation = 2
-    loans = 3
+    users = 201
+    relations = 202
+    loans = 203
+
+class roles(Enum):
+    ADMIN = 301
+    AGENT = 302
+    CUSTOMER = 303

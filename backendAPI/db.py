@@ -10,7 +10,7 @@ def get_db_client():
 
 
 def get_db():
-    return get_db_client()['loans-db']
+    return get_db_client()['loans_db']
 
 def get_collection(coll_name = None):
     if coll_name is not None:
@@ -33,12 +33,10 @@ def count_doc(coll, argsDict):
     return cln.count_documents(argsDict)
 
 
-def add_doc(coll, doc):
+def insert_one_doc(coll, doc):
     cln = get_collection(coll)
-    id = cln.insert_one(doc).inserted_id
-    #close_dbcl()
-    return id
-
+    res = cln.insert_one(doc)
+    return res
 
 
 
@@ -52,13 +50,12 @@ def del_docs(coll, filter):
     return cln.delete_many(filter).deleted_count # returns number of deleted docs
 
 
-def read_doc_ret_cursor(coll, expr):
+def find_docs_count(coll, expr):
     cln = get_collection(coll)
-    return cln.find(expr)
+    return cln.find(expr).count()
 
 
 def edit_single_doc(coll, filter, update):
     cln = get_collection(coll)
     return cln.update_one(filter, update).modified_count  # will return number of documents updated
 
-	

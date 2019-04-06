@@ -1,6 +1,6 @@
 Password Mechanism:
     Although, I would prefer 2FA authentication mechanism for money related apps, for sake of simplicity currently i am employing Python Framework which add salt to the password and hashes it
-    and then store it to db.
+    and then store it to db. Good read: https://passlib.readthedocs.io/en/stable/faq.html
 
 Authentication mechanism:
     I am going to use Token based system since each api call needs to be authenticated. When a user is going to login, password is transmitted over SSL(client side hashing not employed) and then
@@ -12,3 +12,6 @@ Hierarchy of user-roles:
     1. Admins can see all agents and other admins if any.
     2. Agents can only see customers under them, they cannot see other agents. They can only see their direct admins.
     3. Customers cannot see other users.
+
+Database Choice:
+    MongoDB, Since i want to have better mastery over NoSQL db + it scales really well. Besides it has full ACID support from V4.

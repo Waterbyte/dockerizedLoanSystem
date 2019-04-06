@@ -1,5 +1,7 @@
 from webargs import fields, validate, ValidationError
-from backendAPI import constants
+
+import backendAPI.auth
+from backendAPI import constants, utils
 
 argsLogin = {
 
@@ -17,22 +19,22 @@ argsLogin = {
 
 argsAddUser = {
 
-
-    constants.misc_webargs.TOKEN.name: fields.Str(
-        required=True
-    ),
-    constants.misc_webargs.REFERRER.name: fields.Str(
-        required=True
-    ),
     constants.misc_webargs.USERNAME.name: fields.Str(
-        required=True
+        required=True,validate=backendAPI.auth.username_must_not_exist_in_db
     ),
     constants.misc_webargs.PASSWORD.name: fields.Str(
         required=True
     ),
-    constants.misc_webargs.ROLE.name:fields.Str(
+    constants.misc_webargs.ROLE.name: fields.Str(
+        required=True
+    ),
+    constants.misc_webargs.REFERRER_TOKEN.name: fields.Str(
+        required=True
+    ),
+    constants.misc_webargs.REFERRER_USERNAME.name: fields.Str(
         required=True
     )
+
 
 
 }
