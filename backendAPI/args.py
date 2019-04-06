@@ -8,7 +8,7 @@ argsLogin = {
     ############### mandatory ######################
 
     constants.misc_webargs.USERNAME.name: fields.Str(
-        required=True, validate=validate.Length(min=3)
+        required=True, validate=validate.Length(min=1)
     ),
 
     constants.misc_webargs.PASSWORD.name: fields.Str(

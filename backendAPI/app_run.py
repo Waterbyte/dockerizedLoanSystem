@@ -17,7 +17,7 @@ def handle_request_parsing_error(err, req, schema, error_status_code, error_head
     abort(error_status_code, errors=err.messages)
 
 
-# api.add_resource(routes.Login,'/login')
+api.add_resource(routes.Login,'/login')
 api.add_resource(routes.ADDUser,'/adduser')
 
 

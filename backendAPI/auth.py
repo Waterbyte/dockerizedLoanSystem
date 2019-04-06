@@ -59,3 +59,20 @@ def username_must_not_exist_in_db(val):
         raise ValidationError('Username is already taken.')
     else:
         return None
+
+def checkPassword(username,password):
+    expr = {constants.misc_webargs.USERNAME.name:{'$regex': generateExactMatchPattern(username), '$options': 'i'}}
+    cursor = db.find_docs(constants.collectionName.users.name,expr)
+    for val in cursor:   #first 1 object and return
+        hash = val[constants.misc_webargs.PASSWORD.name]
+        return utils.verify_hashedPassword(password,hash)
+    return False
+
+
+def addToken(username,token):
+    filter = {constants.misc_webargs.USERNAME.name:{'$regex': generateExactMatchPattern(username), '$options': 'i'}}
+    update = { '$set':{constants.misc_webargs.TOKEN.name : token} }
+    if db.edit_single_doc(constants.collectionName.users.name,filter,update) > 0:
+        return True
+    return False
+

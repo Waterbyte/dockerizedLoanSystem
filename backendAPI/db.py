@@ -51,9 +51,11 @@ def del_docs(coll, filter):
 
 
 def find_docs_count(coll, expr):
-    cln = get_collection(coll)
-    return cln.find(expr).count()
+    return find_docs(coll,expr).count()
 
+def find_docs(coll,expr):
+    cln = get_collection(coll)
+    return cln.find(expr)
 
 def edit_single_doc(coll, filter, update):
     cln = get_collection(coll)
