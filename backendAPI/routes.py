@@ -9,15 +9,14 @@ class Login(Resource):
         if auth.checkPassword(args[misc_webargs.USERNAME.name],args[misc_webargs.PASSWORD.name]):
             token = utils.id_generator()
             if auth.addToken(args[misc_webargs.USERNAME.name],token):
-                return utils.generate_response(1,token)
+                return utils.generate_response(1,{"TOKEN":token})
         return utils.generate_response(0,"FAILURE")
 
 
 #admins can create other admins and agents. customers can create themeselves but they need to have referring agent
 #referrer token need to be set as dummy value for customers
-class ADDUser(Resource):
-
-    @use_args(args.argsAddUser)
+class RegisterUser(Resource):
+    @use_args(args.argsRegisterUser)
     def post(self,args):
         if args[misc_webargs.ROLE.name] == roles.ADMIN.name:
             if auth.checkTokenRole(args[misc_webargs.REFERRER_USERNAME.name], roles.ADMIN.name, args[misc_webargs.REFERRER_TOKEN.name]):
@@ -33,6 +32,16 @@ class ADDUser(Resource):
                     return utils.generate_response(1, "SUCCESS")
 
         return utils.generate_response(0,"FAILURE")
+
+class ListUser(Resource):
+    @use_args(args.argsListUser)
+    def post(self,args):
+        if auth.checkToken(args[misc_webargs.USERNAME.name],args[misc_webargs.TOKEN.name]):
+            response = auth.getListOfUsers(args[misc_webargs.USERNAME.name])
+            return response
+        return utils.generate_response(0,"FAILURE")
+
+
 
 
 

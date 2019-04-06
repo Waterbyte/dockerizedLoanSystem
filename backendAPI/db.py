@@ -57,6 +57,10 @@ def find_docs(coll,expr):
     cln = get_collection(coll)
     return cln.find(expr)
 
+def find_docs_projection(coll,expr,proj):
+    cln = get_collection(coll)
+    return cln.find(expr,proj)
+
 def edit_single_doc(coll, filter, update):
     cln = get_collection(coll)
     return cln.update_one(filter, update).modified_count  # will return number of documents updated

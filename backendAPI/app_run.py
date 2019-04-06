@@ -18,7 +18,8 @@ def handle_request_parsing_error(err, req, schema, error_status_code, error_head
 
 
 api.add_resource(routes.Login,'/login')
-api.add_resource(routes.ADDUser,'/adduser')
+api.add_resource(routes.RegisterUser, '/registerUser')
+api.add_resource(routes.ListUser,'/listUser')
 
 
 if __name__ == '__main__':
