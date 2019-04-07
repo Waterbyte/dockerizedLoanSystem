@@ -15,3 +15,8 @@ Hierarchy of user-roles:
 
 Database Choice:
     MongoDB, Since i want to have better mastery over NoSQL db + it scales really well. Besides it has full ACID support from V4.
+
+Loans:
+    After analysis I found out that there are varieties of loan types available in the market. I am picking a particular type (unsecured loan) assuming that
+    i can create a basic architecture which can be adapted for other loan types also.
+    
