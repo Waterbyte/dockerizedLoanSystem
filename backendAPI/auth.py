@@ -130,3 +130,13 @@ def getListOfUsers(username):
                                            constants.roles.CUSTOMER.name: customerList})
     else:
         return utils.generate_response(0, "FAILURE")
+
+
+def listLoans():
+    projection = {"_id": 0}
+    cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name,{},projection)
+    list = []
+    for val in cursor:
+        print(val)
+        list.append(val)
+    return list

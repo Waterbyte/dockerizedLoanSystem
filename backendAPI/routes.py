@@ -1,6 +1,6 @@
 from flask_restful import Resource
 from webargs.flaskparser import use_args
-from backendAPI import utils,args,auth,db
+from backendAPI import utils,args,auth,db,initial_setup
 from backendAPI.constants import misc_webargs,roles
 
 class Login(Resource):
@@ -42,6 +42,32 @@ class ListUser(Resource):
         return utils.generate_response(0,"FAILURE")
 
 
+class OneTimeSetup(Resource):
+    def post(self):
+        try:
+            initial_setup.generateLoan1()
+            initial_setup.generateLoanInventoryIndex()
+        except Exception as e:
+            print(e)
+            return utils.generate_response(0, "FAILURE")
+
+        return utils.generate_response(0,"SUCCESS")
+
+class ListLoans(Resource):
+    def post(self):
+        try:
+            val = auth.listLoans()
+        except:
+            return utils.generate_response(0,"FAILURE")
+        return utils.generate_response(1,val)
+
+class CreateLoanRequest(Resource):
+    use_args(args.argsCreateLoanRequest)
+    def post(self,args):
+        pass
+
+class EditLoanRequest(Resource):
+    pass
 
 
 

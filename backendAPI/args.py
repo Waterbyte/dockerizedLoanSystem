@@ -43,3 +43,34 @@ constants.misc_webargs.USERNAME.name: fields.Str(
         required=True
     )
 }
+
+argsCreateLoanRequest = {
+    constants.misc_webargs.REFERRER_USERNAME.name:fields.Str(
+        required = True, validate=validate.Length(min=1)
+    ),
+    constants.misc_webargs.REFERRER_TOKEN.name:fields.Str(
+        required = True
+    ),
+    constants.misc_webargs.USERNAME.name:fields.Str(
+        required = True
+    ),
+    constants.loanCust.ID.name:fields.Str(
+        required = True
+    ),
+    constants.loanCust.AMT.name:fields.Str(
+        required = True
+    ),
+    constants.loanCust.DURATION.name:fields.Str(
+        required = True
+    ),
+    constants.loanCust.MANDATORY_REQUIREMENT1_LOC.name:fields.Str(
+        required = True
+    ),
+    constants.loanCust.MANDATORY_REQUIREMENT2_LOC.name:fields.Str(
+        required = True
+    ),
+    constants.loanCust.EMI_CHOSEN.name:fields.Bool(
+        required = True
+    )
+
+}

@@ -38,7 +38,9 @@ def insert_one_doc(coll, doc):
     res = cln.insert_one(doc)
     return res
 
-
+def create_index(coll,expr,uniqueKey):
+    cln = get_collection(coll)
+    cln.create_index(expr,unique=uniqueKey)
 
 def upsert_one(coll, filt, updt):
     cln = get_collection(coll)

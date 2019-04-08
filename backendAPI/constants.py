@@ -10,6 +10,7 @@ class misc_webargs(Enum):
     TIMESTAMP=7
     AGENT_NAME = 8
     CUSTOMER_NAME = 9
+    TIMEZONE = 10
 
 class response(Enum):
     VERDICT = 101
@@ -25,12 +26,12 @@ class roles(Enum):
     AGENT = 302
     CUSTOMER = 303
 
-class loan(Enum):
+class loanInv(Enum):
     ID = 401
     NAME = 402
     DESC = 403
-    MINLIMIT = 404
-    MAXLIMIT = 405
+    MIN_AMT = 404
+    MAX_AMT = 405
     MIN_DURATION = 406
     MAX_DURATION = 407
     INTERESTRATE = 408
@@ -44,3 +45,20 @@ class loan(Enum):
     MINIMUM_CREDIT_SCORE = 416
     MINIMUM_ANNUAL_INCOME_LOANEE = 417
     MINIMUM_MONTHLY_INCOME_LOANEE = 418
+    IS_REDUCING_RATE_OF_INTEREST = 419
+
+class DocumentType(Enum):
+    PAN_CARD = 501
+    AADHAR_CARD = 502
+    SALARY_SLIP = 503
+    FORM_16 = 504
+
+class loanCust(Enum):
+    ID = 601
+    AMT = 602
+    DURATION = 603
+    MANDATORY_REQUIREMENT1_LOC = 604
+    MANDATORY_REQUIREMENT2_LOC = 605
+    EMI_CHOSEN = 606
+
+
