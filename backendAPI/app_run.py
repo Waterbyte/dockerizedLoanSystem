@@ -24,4 +24,4 @@ api.add_resource(routes.OneTimeSetup,'/oneTimeSetup')
 api.add_resource(routes.ListLoans, '/listLoans')
 
 if __name__ == '__main__':
-    app.run(host='10.131.65.115', port=5000, debug=True)
+    app.run(host='192.168.29.249', port=5000, debug=True)

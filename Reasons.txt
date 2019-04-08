@@ -3,18 +3,18 @@ Password Mechanism:
     and then store it to db. Good read: https://passlib.readthedocs.io/en/stable/faq.html
 
 Authentication mechanism:
-    I am going to use Token based system since each api call needs to be authenticated. When a user is going to login, password is transmitted over SSL(client side hashing not employed) and then
+    I am going to use Token based system since most of the api call needs to be authenticated. When a user is going to login, password is transmitted over SSL(client side hashing not employed) and then
     salted and hashed in server. In return of this api call, a token is given to the user. For subsequent request by the user, till logout, this token needs to be present in all the api calls for
     them to succeed.
 
 Hierarchy of user-roles:
     I am assuming following hierarchy:
     1. Admins can see all agents and other admins if any.
-    2. Agents can only see customers under them, they cannot see other agents. They can only see their direct admins.
+    2. Agents can only see customers under them, they can see other agents and they can also see all admins.
     3. Customers cannot see other users.
 
 Database Choice:
-    MongoDB, Since i want to have better mastery over NoSQL db + it scales really well. Besides it has full ACID support from V4.
+    MongoDB, Since i want to have better mastery over NoSQL db + it scales really well. Besides it has full ACID support from V4 if replicaset is employed.
 
 Loans:
     After analysis I found out that there are varieties of loan types available in the market. I am picking a particular type (unsecured loan) assuming that

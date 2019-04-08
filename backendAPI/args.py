@@ -32,6 +32,9 @@ argsRegisterUser = {
     ),
     constants.misc_webargs.REFERRER_USERNAME.name: fields.Str(
         required=True
+    ),
+    constants.misc_webargs.TIMEZONE.name: fields.Str(
+        required=True,validate=utils.validate_timezone
     )
 }
 
@@ -51,10 +54,10 @@ argsCreateLoanRequest = {
     constants.misc_webargs.REFERRER_TOKEN.name:fields.Str(
         required = True
     ),
-    constants.misc_webargs.USERNAME.name:fields.Str(
+    constants.misc_webargs.CUSTOMER_NAME.name:fields.Str(
         required = True
     ),
-    constants.loanCust.ID.name:fields.Str(
+    constants.loanCust.LOAN_INVT_ID.name:fields.Str(
         required = True
     ),
     constants.loanCust.AMT.name:fields.Str(

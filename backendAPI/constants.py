@@ -20,6 +20,7 @@ class collectionName(Enum):
     users = 201
     relations = 202
     loan_inventory = 203
+    loan_customer = 204
 
 class roles(Enum):
     ADMIN = 301
@@ -54,11 +55,18 @@ class DocumentType(Enum):
     FORM_16 = 504
 
 class loanCust(Enum):
-    ID = 601
+    LOAN_INVT_ID = 601
     AMT = 602
     DURATION = 603
     MANDATORY_REQUIREMENT1_LOC = 604
     MANDATORY_REQUIREMENT2_LOC = 605
     EMI_CHOSEN = 606
+    LOAN_CUST_ID = 607
+    LOAN_STATE = 608
+
+class loanState(Enum):
+    NEW = 701
+    ACCEPTED = 702
+    REJECTED = 703
 
 

@@ -1,6 +1,6 @@
 from backendAPI import utils, db
 from backendAPI.utils import generateExactMatchPattern
-from backendAPI.constants import loanInv, DocumentType,collectionName
+from backendAPI.constants import loanInv, DocumentType,collectionName,misc_webargs
 import pymongo
 
 def generateLoan1():
@@ -23,7 +23,8 @@ def generateLoan1():
         loanInv.MINIMUM_CREDIT_SCORE.name: "750",
         loanInv.MINIMUM_ANNUAL_INCOME_LOANEE.name: "240000",     # rs
         loanInv.MINIMUM_MONTHLY_INCOME_LOANEE.name: "20000",     # rs
-        loanInv.IS_REDUCING_RATE_OF_INTEREST.name: "True"
+        loanInv.IS_REDUCING_RATE_OF_INTEREST.name: "True",
+        misc_webargs.TIMESTAMP.name:utils.generate_current_utc()  #for analytics purpose
     }
     return db.insert_one_doc(collectionName.loan_inventory.name,loanTypeDoc)
 
@@ -31,3 +32,9 @@ def generateLoanInventoryIndex():
     expr = [('ID',pymongo.ASCENDING)]
     uniqueKey = True
     return db.create_index(collectionName.loan_inventory.name,expr,uniqueKey)
+
+def generateSuperadmin():
+    superadmindoc = {
+
+    }
+    return db.insert_one_doc(collectionName.users.name,superadmindoc)

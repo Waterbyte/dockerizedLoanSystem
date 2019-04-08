@@ -64,7 +64,15 @@ class ListLoans(Resource):
 class CreateLoanRequest(Resource):
     use_args(args.argsCreateLoanRequest)
     def post(self,args):
-        pass
+        try:
+            if auth.checkTokenRole(args[misc_webargs.REFERRER_USERNAME.name],roles.AGENT.name,args[misc_webargs.REFERRER_TOKEN.name]):
+                if auth.isCustomerAgentRelated(args[misc_webargs.REFERRER_USERNAME.name],args[misc_webargs.CUSTOMER_NAME.name]):
+                    if auth.addLoan(args):
+                        return utils.generate_response(1, "SUCCESS")
+        except:
+            return utils.generate_response(0,"FAILURE")
+        return utils.generate_response(0, "FAILURE")
+
 
 class EditLoanRequest(Resource):
     pass
