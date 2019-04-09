@@ -41,6 +41,8 @@ def generate_response(VERDICT="0", PAYLOAD=""):
         constants.response.PAYLOAD.name: PAYLOAD
     }
 
+def generate_db_error():
+    return generate_response(0,"SOME TECHNICAL ERROR OCCURED IN DATABASE")
 
 def generateExactMatchPattern(inpStr):
     return "^" + inpStr + "$"

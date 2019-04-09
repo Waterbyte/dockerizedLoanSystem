@@ -19,4 +19,7 @@ Database Choice:
 Loans:
     After analysis I found out that there are varieties of loan types available in the market. I am picking a particular type (unsecured loan) assuming that
     i can create a basic architecture which can be adapted for other loan types also.
-    
+
+Customer_Loan_Id:
+    Each loan request needs to be assigned a unique id. After much analysis, I realized that the default MongoID wouldn't be a good candidate for this task as there is a tiny chance that a duplicate key
+    is generated and the insertion fails due to unique constraint. It is needed to develop own sequential and unique id for this.

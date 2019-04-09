@@ -22,6 +22,10 @@ api.add_resource(routes.RegisterUser, '/registerUser')
 api.add_resource(routes.ListUser,'/listUser')
 api.add_resource(routes.OneTimeSetup,'/oneTimeSetup')
 api.add_resource(routes.ListLoans, '/listLoans')
+api.add_resource(routes.CreateLoanRequest,'/createLoanRequest')
+api.add_resource(routes.ViewLoanRequest,'/viewLoanRequest')
+api.add_resource(routes.EditLoanRequest,'/editLoanRequest')
+
 
 if __name__ == '__main__':
     app.run(host='192.168.29.249', port=5000, debug=True)

@@ -31,15 +31,16 @@ class RegisterUser(Resource):
                 if auth.addUser(args[misc_webargs.USERNAME.name], args[misc_webargs.PASSWORD.name], args[misc_webargs.ROLE.name], args[misc_webargs.REFERRER_USERNAME.name],misc_webargs.TIMEZONE.name):
                     return utils.generate_response(1, "SUCCESS")
 
-        return utils.generate_response(0,"FAILURE")
+        return utils.generate_response(0, "FAILURE")
+
 
 class ListUser(Resource):
     @use_args(args.argsListUser)
-    def post(self,args):
-        if auth.checkToken(args[misc_webargs.USERNAME.name],args[misc_webargs.TOKEN.name]):
+    def post(self, args):
+        if auth.checkToken(args[misc_webargs.USERNAME.name], args[misc_webargs.TOKEN.name]):
             response = auth.getListOfUsers(args[misc_webargs.USERNAME.name])
             return response
-        return utils.generate_response(0,"FAILURE")
+        return utils.generate_response(0, "FAILURE")
 
 
 class OneTimeSetup(Resource):
@@ -54,26 +55,44 @@ class OneTimeSetup(Resource):
             print(e)
             return utils.generate_response(0, "FAILURE")
 
-        return utils.generate_response(0,"SUCCESS")
+        return utils.generate_response(0, "SUCCESS")
+
 
 class ListLoans(Resource):
     def post(self):
         try:
             val = auth.listLoans()
         except:
-            return utils.generate_response(0,"FAILURE")
-        return utils.generate_response(1,val)
+            return utils.generate_response(0, "FAILURE")
+        return utils.generate_response(1, val)
+
 
 class CreateLoanRequest(Resource):
     use_args(args.argsCreateLoanRequest)
-    def post(self,args):
+
+    def post(self, args):
         try:
-            if auth.checkTokenRole(args[misc_webargs.REFERRER_USERNAME.name],roles.AGENT.name,args[misc_webargs.REFERRER_TOKEN.name]):
-                if auth.isCustomerAgentRelated(args[misc_webargs.REFERRER_USERNAME.name],args[misc_webargs.CUSTOMER_NAME.name]):
+            if auth.checkTokenRole(args[misc_webargs.REFERRER_USERNAME.name], roles.AGENT.name,
+                                   args[misc_webargs.REFERRER_TOKEN.name]):
+                if auth.isCustomerAgentRelated(args[misc_webargs.REFERRER_USERNAME.name],
+                                               args[misc_webargs.CUSTOMER_NAME.name]):
                     if auth.addLoan(args):
                         return utils.generate_response(1, "SUCCESS")
         except:
-            return utils.generate_response(0,"FAILURE")
+            return utils.generate_response(0, "FAILURE")
+        return utils.generate_response(0, "FAILURE")
+
+
+class ViewLoanRequest(Resource):
+    use_args(args.argsViewLoanRequest)
+
+    def post(self, args):
+        try:
+            if auth.checkPassword(args[misc_webargs.USERNAME.name], args[misc_webargs.PASSWORD.name]):
+                val = auth.viewLoansRequest(args[misc_webargs.USERNAME.name])
+                return val
+        except:
+            return utils.generate_response(0, "FAILURE")
         return utils.generate_response(0, "FAILURE")
 
 

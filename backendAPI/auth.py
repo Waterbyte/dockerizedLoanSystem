@@ -135,16 +135,18 @@ def getListOfUsers(username):
 
 def listLoans():
     projection = {"_id": 0}
-    cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name, {}, projection)
+    try:
+        cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name,{},projection)
+    except:
+        return utils.generate_db_error()
     list = []
     for val in cursor:
         print(val)
         list.append(val)
     return list
 
-
 def isCustomerAgentRelated(agentName, customerName):
-    expr = {constants.misc_webargs.AGENT_NAME.name: agentName, constants.misc_webargs.CUSTOMER_NAME.name: customerName}
+    expr = {constants.misc_webargs.AGENT_NAME.name:agentName, constants.misc_webargs.CUSTOMER_NAME.name:customerName}
     count = db.find_docs_count(constants.collectionName.relations.name, expr)
     if count == 1:
         return True
@@ -167,12 +169,41 @@ def addLoan(args):
         constants.misc_webargs.TIMESTAMP.name: utils.generate_current_utc()
     }
     try:
-        db.insert_one_doc(constants.collectionName.loan_customer.name, loan_doc)
+        db.insert_one_doc(constants.collectionName.loan_customer.name,loan_doc)
     except:
         return False
     return True
 
+def viewLoansRequest(username):
+    expr = {constants.misc_webargs.USERNAME.name: {'$regex': generateExactMatchPattern(username), '$options': 'i'}}
+    cursor = db.find_docs(constants.collectionName.users.name, expr)
+    role = None
+    for val in cursor:
+        role = val[constants.misc_webargs.ROLE.name]
+
+    if role == constants.roles.ADMIN.name:
+        expr = {}
+    elif role == constants.roles.AGENT.name:
+        expr = {constants.misc_webargs.REFERRER_USERNAME.name: username}
+    else:
+        expr = {constants.misc_webargs.CUSTOMER_NAME.name:username}
+
+    list = []
+    projection = {"_id": 0}
+    try:
+        cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name, expr, projection)
+    except:
+        return utils.generate_db_error()
+
+    for val in cursor:
+        list.append(val)
+
+    return utils.generate_response(1,val)
+
 
 def getCustomerLoanId():
     db.find_and_modify(constants.collectionName.counters.name, {"_id": constants.loanCust.LOAN_CUST_ID.name},
-                       {"$inc": {"misc_webargs.SEQ_VAL.name": 1}})
+                       {"$inc": {constants.misc_webargs.SEQ_VAL.name: 1}})
+
+def editLoanRequest():
+    pass

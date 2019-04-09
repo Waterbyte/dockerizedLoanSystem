@@ -77,3 +77,5 @@ argsCreateLoanRequest = {
     )
 
 }
+
+argsViewLoanRequest = argsLogin
