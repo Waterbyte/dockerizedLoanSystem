@@ -134,7 +134,10 @@ def getListOfUsers(username):
 
 def listLoans():
     projection = {"_id": 0}
-    cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name,{},projection)
+    try:
+        cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name,{},projection)
+    except:
+        return utils.generate_db_error()
     list = []
     for val in cursor:
         print(val)
@@ -167,3 +170,32 @@ def addLoan(args):
     except:
         return False
     return True
+
+def viewLoansRequest(username):
+    expr = {constants.misc_webargs.USERNAME.name: {'$regex': generateExactMatchPattern(username), '$options': 'i'}}
+    cursor = db.find_docs(constants.collectionName.users.name, expr)
+    role = None
+    for val in cursor:
+        role = val[constants.misc_webargs.ROLE.name]
+
+    if role == constants.roles.ADMIN.name:
+        expr = {}
+    elif role == constants.roles.AGENT.name:
+        expr = {constants.misc_webargs.REFERRER_USERNAME.name: username}
+    else:
+        expr = {constants.misc_webargs.CUSTOMER_NAME.name:username}
+
+    list = []
+    projection = {"_id": 0}
+    try:
+        cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name, expr, projection)
+    except:
+        return utils.generate_db_error()
+
+    for val in cursor:
+        list.append(val)
+
+    return utils.generate_response(1,val)
+
+def editLoanRequest():
+    pass
