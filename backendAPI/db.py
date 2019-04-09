@@ -67,3 +67,7 @@ def edit_single_doc(coll, filter, update):
     cln = get_collection(coll)
     return cln.update_one(filter, update).modified_count  # will return number of documents updated
 
+def find_and_modify(coll,expr,updt):
+    cln = get_collection(coll)
+    return cln.find_one_and_update(expr,updt)
+

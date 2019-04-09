@@ -11,6 +11,7 @@ class misc_webargs(Enum):
     AGENT_NAME = 8
     CUSTOMER_NAME = 9
     TIMEZONE = 10
+    SEQ_VAL = 11
 
 class response(Enum):
     VERDICT = 101
@@ -21,6 +22,7 @@ class collectionName(Enum):
     relations = 202
     loan_inventory = 203
     loan_customer = 204
+    counters = 205
 
 class roles(Enum):
     ADMIN = 301

@@ -1,6 +1,5 @@
 from backendAPI import utils, db
-from backendAPI.utils import generateExactMatchPattern
-from backendAPI.constants import loanInv, DocumentType,collectionName,misc_webargs
+from backendAPI.constants import loanInv, DocumentType, collectionName, misc_webargs, loanCust, roles
 import pymongo
 
 def generateLoan1():
@@ -35,6 +34,18 @@ def generateLoanInventoryIndex():
 
 def generateSuperadmin():
     superadmindoc = {
-
+        misc_webargs.USERNAME.name: "superadmin",
+        misc_webargs.PASSWORD.name: utils.generate_hashedPassword("pass!@312"),
+        misc_webargs.ROLE.name: roles.ADMIN.name,
+        misc_webargs.TIMEZONE.name: "Asia/Kolkata",
+        misc_webargs.TIMESTAMP.name: utils.generate_current_utc()
     }
     return db.insert_one_doc(collectionName.users.name,superadmindoc)
+
+def generateUsersUniqueIndex():
+    expr = [(misc_webargs.USERNAME.name, pymongo.TEXT)]
+    uniqueKey = True
+    return db.create_index(collectionName.users.name, expr, uniqueKey)
+
+def insertInitialCounterValue():
+    db.insert_one_doc(collectionName.counters.name,{"_id": loanCust.LOAN_CUST_ID.name, misc_webargs.SEQ_VAL.name: 0})

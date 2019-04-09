@@ -20,15 +20,15 @@ class RegisterUser(Resource):
     def post(self,args):
         if args[misc_webargs.ROLE.name] == roles.ADMIN.name:
             if auth.checkTokenRole(args[misc_webargs.REFERRER_USERNAME.name], roles.ADMIN.name, args[misc_webargs.REFERRER_TOKEN.name]):
-                if auth.addUser(args[misc_webargs.USERNAME.name], args[misc_webargs.PASSWORD.name], args[misc_webargs.ROLE.name]):
+                if auth.addUser(args[misc_webargs.USERNAME.name], args[misc_webargs.PASSWORD.name], args[misc_webargs.ROLE.name],"",args[misc_webargs.TIMEZONE.name]):
                     return utils.generate_response(1,"SUCCESS")
         elif args[misc_webargs.ROLE.name] == roles.AGENT.name:
             if auth.checkTokenRole(args[misc_webargs.REFERRER_USERNAME.name], roles.ADMIN.name, args[misc_webargs.REFERRER_TOKEN.name]):
-                if auth.addUser(args[misc_webargs.USERNAME.name], args[misc_webargs.PASSWORD.name], args[misc_webargs.ROLE.name]):
+                if auth.addUser(args[misc_webargs.USERNAME.name], args[misc_webargs.PASSWORD.name], args[misc_webargs.ROLE.name],"",args[misc_webargs.TIMEZONE.name]):
                     return utils.generate_response(1, "SUCCESS")
         elif args[misc_webargs.ROLE.name] == roles.CUSTOMER.name:
             if auth.checkRoles(args[misc_webargs.REFERRER_USERNAME.name], roles.AGENT.name):
-                if auth.addUser(args[misc_webargs.USERNAME.name], args[misc_webargs.PASSWORD.name], args[misc_webargs.ROLE.name], args[misc_webargs.REFERRER_USERNAME.name]):
+                if auth.addUser(args[misc_webargs.USERNAME.name], args[misc_webargs.PASSWORD.name], args[misc_webargs.ROLE.name], args[misc_webargs.REFERRER_USERNAME.name],misc_webargs.TIMEZONE.name):
                     return utils.generate_response(1, "SUCCESS")
 
         return utils.generate_response(0,"FAILURE")
@@ -45,8 +45,11 @@ class ListUser(Resource):
 class OneTimeSetup(Resource):
     def post(self):
         try:
+            initial_setup.generateUsersUniqueIndex()
+            initial_setup.generateSuperadmin()
             initial_setup.generateLoan1()
             initial_setup.generateLoanInventoryIndex()
+            initial_setup.insertInitialCounterValue()
         except Exception as e:
             print(e)
             return utils.generate_response(0, "FAILURE")

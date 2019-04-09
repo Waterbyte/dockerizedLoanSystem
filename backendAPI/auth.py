@@ -34,14 +34,15 @@ def checkTokenRole(username, role, token):
         return False
 
 
-def addUser(username, password, role, referrer_username=""):
+def addUser(username, password, role, referrer_username="",timezone_x="UTC"):
     try:
         current_time = utils.generate_current_utc()
         doc = {
             constants.misc_webargs.USERNAME.name: username,
             constants.misc_webargs.PASSWORD.name: utils.generate_hashedPassword(password),
             constants.misc_webargs.ROLE.name: role,
-            constants.misc_webargs.TIMESTAMP.name: current_time
+            constants.misc_webargs.TIMESTAMP.name: current_time,
+            constants.misc_webargs.TIMEZONE.name: timezone_x
         }
         db.insert_one_doc(constants.collectionName.users.name, doc)
 
@@ -134,36 +135,44 @@ def getListOfUsers(username):
 
 def listLoans():
     projection = {"_id": 0}
-    cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name,{},projection)
+    cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name, {}, projection)
     list = []
     for val in cursor:
         print(val)
         list.append(val)
     return list
 
+
 def isCustomerAgentRelated(agentName, customerName):
-    expr = {constants.misc_webargs.AGENT_NAME.name:agentName, constants.misc_webargs.CUSTOMER_NAME.name:customerName}
+    expr = {constants.misc_webargs.AGENT_NAME.name: agentName, constants.misc_webargs.CUSTOMER_NAME.name: customerName}
     count = db.find_docs_count(constants.collectionName.relations.name, expr)
     if count == 1:
         return True
     else:
         return False
 
+
 def addLoan(args):
     loan_doc = {
-        constants.misc_webargs.CUSTOMER_NAME.name:args[constants.misc_webargs.CUSTOMER_NAME.name],
-        constants.misc_webargs.REFERRER_USERNAME.name:args[constants.misc_webargs.REFERRER_USERNAME.name],
-        constants.loanCust.LOAN_INVT_ID.name:args[constants.loanCust.LOAN_INVT_ID.name],
-        constants.loanCust.AMT.name:args[constants.loanCust.AMT.name],
-        constants.loanCust.DURATION.name:args[constants.loanCust.DURATION.name],
-        constants.loanCust.MANDATORY_REQUIREMENT1_LOC.name:args[constants.loanCust.MANDATORY_REQUIREMENT1_LOC.name],
-        constants.loanCust.MANDATORY_REQUIREMENT2_LOC.name:args[constants.loanCust.MANDATORY_REQUIREMENT2_LOC.name],
-        constants.loanCust.EMI_CHOSEN.name:args[constants.loanCust.EMI_CHOSEN.name],
-        constants.loanCust.LOAN_STATE.name:constants.loanState.NEW.name,
-        constants.misc_webargs.TIMESTAMP.name:utils.generate_current_utc()
+        constants.loanCust.LOAN_CUST_ID.name: getCustomerLoanId(),
+        constants.misc_webargs.CUSTOMER_NAME.name: args[constants.misc_webargs.CUSTOMER_NAME.name],
+        constants.misc_webargs.REFERRER_USERNAME.name: args[constants.misc_webargs.REFERRER_USERNAME.name],
+        constants.loanCust.LOAN_INVT_ID.name: args[constants.loanCust.LOAN_INVT_ID.name],
+        constants.loanCust.AMT.name: args[constants.loanCust.AMT.name],
+        constants.loanCust.DURATION.name: args[constants.loanCust.DURATION.name],
+        constants.loanCust.MANDATORY_REQUIREMENT1_LOC.name: args[constants.loanCust.MANDATORY_REQUIREMENT1_LOC.name],
+        constants.loanCust.MANDATORY_REQUIREMENT2_LOC.name: args[constants.loanCust.MANDATORY_REQUIREMENT2_LOC.name],
+        constants.loanCust.EMI_CHOSEN.name: args[constants.loanCust.EMI_CHOSEN.name],
+        constants.loanCust.LOAN_STATE.name: constants.loanState.NEW.name,
+        constants.misc_webargs.TIMESTAMP.name: utils.generate_current_utc()
     }
     try:
-        db.insert_one_doc(constants.collectionName.loan_customer.name,loan_doc)
+        db.insert_one_doc(constants.collectionName.loan_customer.name, loan_doc)
     except:
         return False
     return True
+
+
+def getCustomerLoanId():
+    db.find_and_modify(constants.collectionName.counters.name, {"_id": constants.loanCust.LOAN_CUST_ID.name},
+                       {"$inc": {"misc_webargs.SEQ_VAL.name": 1}})

@@ -19,10 +19,10 @@ argsLogin = {
 
 argsRegisterUser = {
     constants.misc_webargs.USERNAME.name: fields.Str(
-        required=True,validate=backendAPI.auth.username_must_not_exist_in_db
+        required=True, validate=backendAPI.auth.username_must_not_exist_in_db
     ),
     constants.misc_webargs.PASSWORD.name: fields.Str(
-        required=True
+        required=True, validate=validate.Length(min=8)
     ),
     constants.misc_webargs.ROLE.name: fields.Str(
         required=True
