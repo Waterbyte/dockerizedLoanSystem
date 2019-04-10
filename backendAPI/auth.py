@@ -134,14 +134,13 @@ def getListOfUsers(username):
 
 
 def listLoans():
-    projection = {"_id": 0}
+    projection = {"_id": 0, constants.misc_webargs.TIMESTAMP.name:0}
     try:
         cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name,{},projection)
     except:
         return utils.generate_db_error()
     list = []
     for val in cursor:
-        print(val)
         list.append(val)
     return list
 
@@ -155,6 +154,23 @@ def isCustomerAgentRelated(agentName, customerName):
 
 
 def addLoan(args):
+    expr = {constants.loanInv.ID.name:args[constants.loanCust.LOAN_INVT_ID.name]}
+    loan_object = db.find_docs(constants.collectionName.loan_inventory.name,expr)
+    minimum_Dur = minimum_Amt = maximum_Dur = maximum_Amt =  is_Emi_Avail = None
+    for loan_item in loan_object:
+        minimum_Amt = int(loan_item[constants.loanInv.MIN_AMT.name])
+        maximum_Amt = int(loan_item[constants.loanInv.MAX_AMT.name])
+        minimum_Dur = int(loan_item[constants.loanInv.MIN_DURATION.name])
+        maximum_Dur = int(loan_item[constants.loanInv.MAX_DURATION.name])
+        is_Emi_Avail = bool(loan_item[constants.loanInv.EMI_AVAILABLE.name])
+        break
+
+    print(minimum_Amt)
+    print(maximum_Amt)
+    print(minimum_Dur)
+    print(maximum_Dur)
+    print(is_Emi_Avail)
+
     loan_doc = {
         constants.loanCust.LOAN_CUST_ID.name: getCustomerLoanId(),
         constants.misc_webargs.CUSTOMER_NAME.name: args[constants.misc_webargs.CUSTOMER_NAME.name],
@@ -167,10 +183,12 @@ def addLoan(args):
         constants.loanCust.EMI_CHOSEN.name: args[constants.loanCust.EMI_CHOSEN.name],
         constants.loanCust.LOAN_STATE.name: constants.loanState.NEW.name,
         constants.misc_webargs.TIMESTAMP.name: utils.generate_current_utc()
+
     }
     try:
         db.insert_one_doc(constants.collectionName.loan_customer.name,loan_doc)
-    except:
+    except Exception as e:
+        print(e)
         return False
     return True
 
@@ -202,8 +220,9 @@ def viewLoansRequest(username):
 
 
 def getCustomerLoanId():
-    db.find_and_modify(constants.collectionName.counters.name, {"_id": constants.loanCust.LOAN_CUST_ID.name},
-                       {"$inc": {constants.misc_webargs.SEQ_VAL.name: 1}})
+    val = db.find_and_modify(constants.collectionName.counters.name, {"_id": constants.loanCust.LOAN_CUST_ID.name},
+                       {"$inc": {constants.misc_webargs.SEQ_VAL.name: 1}},{})
+    return val['SEQ_VAL']
 
 def editLoanRequest():
     pass

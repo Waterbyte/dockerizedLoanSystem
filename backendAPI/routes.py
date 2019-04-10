@@ -28,7 +28,7 @@ class RegisterUser(Resource):
                     return utils.generate_response(1, "SUCCESS")
         elif args[misc_webargs.ROLE.name] == roles.CUSTOMER.name:
             if auth.checkRoles(args[misc_webargs.REFERRER_USERNAME.name], roles.AGENT.name):
-                if auth.addUser(args[misc_webargs.USERNAME.name], args[misc_webargs.PASSWORD.name], args[misc_webargs.ROLE.name], args[misc_webargs.REFERRER_USERNAME.name],misc_webargs.TIMEZONE.name):
+                if auth.addUser(args[misc_webargs.USERNAME.name], args[misc_webargs.PASSWORD.name], args[misc_webargs.ROLE.name], args[misc_webargs.REFERRER_USERNAME.name],args[misc_webargs.TIMEZONE.name]):
                     return utils.generate_response(1, "SUCCESS")
 
         return utils.generate_response(0, "FAILURE")
@@ -68,8 +68,8 @@ class ListLoans(Resource):
 
 
 class CreateLoanRequest(Resource):
-    use_args(args.argsCreateLoanRequest)
 
+    @use_args(args.argsCreateLoanRequest)
     def post(self, args):
         try:
             if auth.checkTokenRole(args[misc_webargs.REFERRER_USERNAME.name], roles.AGENT.name,
@@ -84,8 +84,8 @@ class CreateLoanRequest(Resource):
 
 
 class ViewLoanRequest(Resource):
-    use_args(args.argsViewLoanRequest)
 
+    @use_args(args.argsViewLoanRequest)
     def post(self, args):
         try:
             if auth.checkPassword(args[misc_webargs.USERNAME.name], args[misc_webargs.PASSWORD.name]):

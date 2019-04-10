@@ -21,10 +21,8 @@ def convert_utc_to_timezone_x(time_utc, timezone_x):
 
 
 def validate_timezone(timezone_x):
-    if timezone_x in all_timezones:
-        return None
-    else:
-        return ValidationError('Invalid Timezone.')
+    if not timezone_x in all_timezones:
+        raise ValidationError("Invalid Timezone.")
 
 
 def generate_hashedPassword(password):
