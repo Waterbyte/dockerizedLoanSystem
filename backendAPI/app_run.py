@@ -20,6 +20,7 @@ def handle_request_parsing_error(err, req, schema, error_status_code, error_head
 api.add_resource(routes.Login,'/login')
 api.add_resource(routes.RegisterUser, '/registerUser')
 api.add_resource(routes.ListUser,'/listUser')
+api.add_resource(routes.EditUser,'/editUser')
 api.add_resource(routes.OneTimeSetup,'/oneTimeSetup')
 api.add_resource(routes.ListLoans, '/listLoans')
 api.add_resource(routes.CreateLoanRequest,'/createLoanRequest')

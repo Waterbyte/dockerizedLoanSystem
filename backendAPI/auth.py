@@ -158,11 +158,11 @@ def addLoan(args):
     loan_object = db.find_docs(constants.collectionName.loan_inventory.name,expr)
     minimum_Dur = minimum_Amt = maximum_Dur = maximum_Amt =  is_Emi_Avail = None
     for loan_item in loan_object:
-        minimum_Amt = int(loan_item[constants.loanInv.MIN_AMT.name])
-        maximum_Amt = int(loan_item[constants.loanInv.MAX_AMT.name])
-        minimum_Dur = int(loan_item[constants.loanInv.MIN_DURATION.name])
-        maximum_Dur = int(loan_item[constants.loanInv.MAX_DURATION.name])
-        is_Emi_Avail = bool(loan_item[constants.loanInv.EMI_AVAILABLE.name])
+        minimum_Amt = loan_item[constants.loanInv.MIN_AMT.name],
+        maximum_Amt = loan_item[constants.loanInv.MAX_AMT.name],
+        minimum_Dur = loan_item[constants.loanInv.MIN_DURATION.name],
+        maximum_Dur = loan_item[constants.loanInv.MAX_DURATION.name],
+        is_Emi_Avail = loan_item[constants.loanInv.EMI_AVAILABLE.name]
         break
 
     print(minimum_Amt)
@@ -225,4 +225,7 @@ def getCustomerLoanId():
     return val['SEQ_VAL']
 
 def editLoanRequest():
+    pass
+
+def editUserInfo(args):
     pass

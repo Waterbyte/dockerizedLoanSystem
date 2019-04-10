@@ -42,6 +42,14 @@ class ListUser(Resource):
             return response
         return utils.generate_response(0, "FAILURE")
 
+class EditUser(Resource):
+    @use_args(args.argsEditUser)
+    def post(self,args):
+        if auth.checkToken(args[misc_webargs.REFERRER_USERNAME.name], args[misc_webargs.TOKEN.name]):
+            if auth.editUserInfo(args):
+                return utils.generate_response(1, "SUCCESS")
+        return utils.generate_response(0, "FAILURE")
+
 
 class OneTimeSetup(Resource):
     def post(self):

@@ -47,6 +47,30 @@ constants.misc_webargs.USERNAME.name: fields.Str(
     )
 }
 
+argsEditUser = {
+    constants.misc_webargs.USERNAME.name: fields.Str(
+    required = True
+    ),
+    constants.misc_webargs.REFERRER_USERNAME.name: fields.Str(
+    required = True
+    ),
+    constants.misc_webargs.REFERRER_TOKEN.name: fields.Str(
+    required = True
+    ),
+    constants.misc_webargs.CREDIT_SCORE.name:fields.Int(
+
+    ),
+    constants.misc_webargs.DOCUMENT1_VER_STATUS.name:fields.Bool(
+
+    ),
+    constants.misc_webargs.DOCUMENT2_VER_STATUS.name:fields.Bool(
+
+    ),
+    constants.misc_webargs.TIMEZONE.name:fields.Str(
+    validate=utils.validate_timezone
+    )
+}
+
 argsCreateLoanRequest = {
     constants.misc_webargs.REFERRER_USERNAME.name:fields.Str(
         required = True, validate=validate.Length(min=1)
@@ -60,10 +84,10 @@ argsCreateLoanRequest = {
     constants.loanCust.LOAN_INVT_ID.name:fields.Str(
         required = True
     ),
-    constants.loanCust.AMT.name:fields.Str(
+    constants.loanCust.AMT.name:fields.Int(
         required = True
     ),
-    constants.loanCust.DURATION.name:fields.Str(
+    constants.loanCust.DURATION.name:fields.Int(
         required = True
     ),
     constants.loanCust.MANDATORY_REQUIREMENT1_LOC.name:fields.Str(

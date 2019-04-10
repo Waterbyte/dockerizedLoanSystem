@@ -12,6 +12,11 @@ class misc_webargs(Enum):
     CUSTOMER_NAME = 9
     TIMEZONE = 10
     SEQ_VAL = 11
+    CREDIT_SCORE = 12
+    DOCUMENT1_VER_STATUS = 13
+    DOCUMENT2_VER_STATUS = 14
+    MONTHLY_INCOME = 15
+    ANNUAL_INCOME = 16
 
 class response(Enum):
     VERDICT = 101
