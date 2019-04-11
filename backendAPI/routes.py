@@ -108,4 +108,6 @@ class EditLoanRequest(Resource):
     pass
 
 
+class ApproveLoanRequest(Resource):
+    pass
 

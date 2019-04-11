@@ -26,6 +26,7 @@ api.add_resource(routes.ListLoans, '/listLoans')
 api.add_resource(routes.CreateLoanRequest,'/createLoanRequest')
 api.add_resource(routes.ViewLoanRequest,'/viewLoanRequest')
 api.add_resource(routes.EditLoanRequest,'/editLoanRequest')
+api.add_resource(routes.ApproveLoanRequest,'/approveLoanRequest')
 
 
 if __name__ == '__main__':

@@ -228,4 +228,23 @@ def editLoanRequest():
     pass
 
 def editUserInfo(args):
-    pass
+    expr = {constants.misc_webargs.USERNAME.name: {'$regex': generateExactMatchPattern(args[constants.misc_webargs.REFERRER_USERNAME.name]), '$options': 'i'}}
+    cursor = db.find_docs(constants.collectionName.users.name, expr)
+    role = None
+    for val in cursor:
+        role = val[constants.misc_webargs.ROLE.name]
+
+    if role == constants.roles.ADMIN.name:
+        updt = {constants.misc_webargs.CREDIT_SCORE.name:args[constants.misc_webargs.CREDIT_SCORE.name],
+                constants.misc_webargs.DOCUMENT1_VER_STATUS.name:args[constants.misc_webargs.DOCUMENT1_VER_STATUS.name],
+                constants.misc_webargs.DOCUMENT2_VER_STATUS.name:args[constants.misc_webargs.DOCUMENT2_VER_STATUS.name]
+                }
+    elif role == constants.roles.AGENT.name:
+        updt = {constants.misc_webargs.TIMEZONE.name: args[constants.misc_webargs.TIMEZONE.name]}
+    else:
+        return False
+    try:
+        db.find_and_modify(constants.collectionName.users.name,expr,updt,False)
+    except:
+        return False
+    return True
