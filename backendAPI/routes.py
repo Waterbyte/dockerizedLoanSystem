@@ -105,9 +105,26 @@ class ViewLoanRequest(Resource):
 
 
 class EditLoanRequest(Resource):
-    pass
+    @use_args(args.argsEditLoanRequest)
+    def post(self, args):
+        try:
+            if auth.checkTokenRole(args[misc_webargs.REFERRER_USERNAME.name], roles.AGENT.name,args[misc_webargs.REFERRER_TOKEN.name]):
+                if auth.editLoanRequest(args):
+                    return utils.generate_response(1, "SUCCESS")
+        except Exception as e:
+            print(e)
+        return utils.generate_response(0,"FAILURE")
 
 
 class ApproveLoanRequest(Resource):
-    pass
+    @use_args(args.argsApproveLoanRequest)
+    def post(self, args):
+        try:
+            if auth.checkTokenRole(args[misc_webargs.REFERRER_USERNAME.name], roles.ADMIN.name,
+                                   args[misc_webargs.REFERRER_TOKEN.name]):
+                if auth.approveLoanRequest():
+                    return utils.generate_response(1, "SUCCESS")
+        except:
+            pass
+        return utils.generate_response(0, "FAILURE")
 

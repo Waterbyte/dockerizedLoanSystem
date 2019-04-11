@@ -59,6 +59,10 @@ def find_docs(coll,expr):
     cln = get_collection(coll)
     return cln.find(expr)
 
+def find_single_doc_with_desc_sort(coll,expr,proj,sortExpr):
+    cln = get_collection(coll)
+    return cln.find(expr,proj).sort(sortExpr).limit(1)
+
 def find_docs_projection(coll,expr,proj):
     cln = get_collection(coll)
     return cln.find(expr,proj)

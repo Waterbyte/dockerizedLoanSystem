@@ -1,3 +1,4 @@
+import pymongo
 from marshmallow import ValidationError
 
 from backendAPI import utils, db, constants
@@ -34,7 +35,7 @@ def checkTokenRole(username, role, token):
         return False
 
 
-def addUser(username, password, role, referrer_username="",timezone_x="UTC"):
+def addUser(username, password, role, referrer_username="", timezone_x="UTC"):
     try:
         current_time = utils.generate_current_utc()
         doc = {
@@ -134,9 +135,9 @@ def getListOfUsers(username):
 
 
 def listLoans():
-    projection = {"_id": 0, constants.misc_webargs.TIMESTAMP.name:0}
+    projection = {"_id": 0, constants.misc_webargs.TIMESTAMP.name: 0}
     try:
-        cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name,{},projection)
+        cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name, {}, projection)
     except:
         return utils.generate_db_error()
     list = []
@@ -144,8 +145,9 @@ def listLoans():
         list.append(val)
     return list
 
+
 def isCustomerAgentRelated(agentName, customerName):
-    expr = {constants.misc_webargs.AGENT_NAME.name:agentName, constants.misc_webargs.CUSTOMER_NAME.name:customerName}
+    expr = {constants.misc_webargs.AGENT_NAME.name: agentName, constants.misc_webargs.CUSTOMER_NAME.name: customerName}
     count = db.find_docs_count(constants.collectionName.relations.name, expr)
     if count == 1:
         return True
@@ -154,43 +156,48 @@ def isCustomerAgentRelated(agentName, customerName):
 
 
 def addLoan(args):
-    expr = {constants.loanInv.ID.name:args[constants.loanCust.LOAN_INVT_ID.name]}
-    loan_object = db.find_docs(constants.collectionName.loan_inventory.name,expr)
-    minimum_Dur = minimum_Amt = maximum_Dur = maximum_Amt =  is_Emi_Avail = None
+    expr = {constants.loanInv.ID.name: args[constants.loanCust.LOAN_INVT_ID.name]}
+    loan_object = db.find_docs(constants.collectionName.loan_inventory.name, expr).limit(1)
+    minimum_Dur = minimum_Amt = maximum_Dur = maximum_Amt = is_Emi_Avail = None
     for loan_item in loan_object:
-        minimum_Amt = loan_item[constants.loanInv.MIN_AMT.name],
-        maximum_Amt = loan_item[constants.loanInv.MAX_AMT.name],
-        minimum_Dur = loan_item[constants.loanInv.MIN_DURATION.name],
-        maximum_Dur = loan_item[constants.loanInv.MAX_DURATION.name],
+        minimum_Amt = loan_item[constants.loanInv.MIN_AMT.name]
+        maximum_Amt = loan_item[constants.loanInv.MAX_AMT.name]
+        minimum_Dur = loan_item[constants.loanInv.MIN_DURATION.name]
+        maximum_Dur = loan_item[constants.loanInv.MAX_DURATION.name]
         is_Emi_Avail = loan_item[constants.loanInv.EMI_AVAILABLE.name]
-        break
 
-    print(minimum_Amt)
-    print(maximum_Amt)
-    print(minimum_Dur)
-    print(maximum_Dur)
-    print(is_Emi_Avail)
+    cust_amt = args[constants.loanCust.AMT.name]
+    cust_dur = args[constants.loanCust.DURATION.name]
+    cust_emi_status = args[constants.loanCust.EMI_CHOSEN.name]
+
+    if not (cust_amt <= maximum_Amt and cust_amt >= minimum_Amt):
+        return False
+    if not (cust_dur <= maximum_Dur and cust_dur >= minimum_Dur):
+        return False
+    if cust_emi_status == True:
+        if is_Emi_Avail != True:
+            return False
 
     loan_doc = {
-        constants.loanCust.LOAN_CUST_ID.name: getCustomerLoanId(),
+        constants.loanCust.LOAN_CUST_ID.name: str(getCustomerLoanId()),
         constants.misc_webargs.CUSTOMER_NAME.name: args[constants.misc_webargs.CUSTOMER_NAME.name],
         constants.misc_webargs.REFERRER_USERNAME.name: args[constants.misc_webargs.REFERRER_USERNAME.name],
         constants.loanCust.LOAN_INVT_ID.name: args[constants.loanCust.LOAN_INVT_ID.name],
-        constants.loanCust.AMT.name: args[constants.loanCust.AMT.name],
+        constants.loanCust.AMT.name: cust_amt,
         constants.loanCust.DURATION.name: args[constants.loanCust.DURATION.name],
         constants.loanCust.MANDATORY_REQUIREMENT1_LOC.name: args[constants.loanCust.MANDATORY_REQUIREMENT1_LOC.name],
         constants.loanCust.MANDATORY_REQUIREMENT2_LOC.name: args[constants.loanCust.MANDATORY_REQUIREMENT2_LOC.name],
-        constants.loanCust.EMI_CHOSEN.name: args[constants.loanCust.EMI_CHOSEN.name],
+        constants.loanCust.EMI_CHOSEN.name: cust_emi_status,
         constants.loanCust.LOAN_STATE.name: constants.loanState.NEW.name,
         constants.misc_webargs.TIMESTAMP.name: utils.generate_current_utc()
-
     }
     try:
-        db.insert_one_doc(constants.collectionName.loan_customer.name,loan_doc)
+        db.insert_one_doc(constants.collectionName.loan_customer.name, loan_doc)
     except Exception as e:
         print(e)
         return False
     return True
+
 
 def viewLoansRequest(username):
     expr = {constants.misc_webargs.USERNAME.name: {'$regex': generateExactMatchPattern(username), '$options': 'i'}}
@@ -204,7 +211,7 @@ def viewLoansRequest(username):
     elif role == constants.roles.AGENT.name:
         expr = {constants.misc_webargs.REFERRER_USERNAME.name: username}
     else:
-        expr = {constants.misc_webargs.CUSTOMER_NAME.name:username}
+        expr = {constants.misc_webargs.CUSTOMER_NAME.name: username}
 
     list = []
     projection = {"_id": 0}
@@ -216,35 +223,63 @@ def viewLoansRequest(username):
     for val in cursor:
         list.append(val)
 
-    return utils.generate_response(1,val)
+    return utils.generate_response(1, val)
 
 
 def getCustomerLoanId():
     val = db.find_and_modify(constants.collectionName.counters.name, {"_id": constants.loanCust.LOAN_CUST_ID.name},
-                       {"$inc": {constants.misc_webargs.SEQ_VAL.name: 1}},{})
+                             {"$inc": {constants.misc_webargs.SEQ_VAL.name: 1}}, {})
     return val['SEQ_VAL']
 
-def editLoanRequest():
+
+def editLoanRequest(args):
+    val = None
+    proj = {"_id": 0}
+    expr = {constants.loanCust.LOAN_CUST_ID.name:args[constants.loanCust.LOAN_CUST_ID.name]}
+    sortExpr = [(constants.misc_webargs.TIMESTAMP.name,pymongo.DESCENDING)]
+    loanRequest = db.find_single_doc_with_desc_sort(constants.collectionName.loan_customer.name, expr, proj, sortExpr)
+    for val in loanRequest:
+        print(val)
+    if constants.loanCust.LOAN_STATE.name in val and  val[constants.loanCust.LOAN_STATE.name] == constants.loanState.ACCEPTED.name:
+        return False
     pass
 
+def approveLoanRequest(args):
+    proj = {"_id": 0}
+    expr = {constants.loanCust.LOAN_CUST_ID.name: args[constants.loanCust.LOAN_CUST_ID.name]}
+    sortExpr = {constants.misc_webargs.TIMESTAMP.name: pymongo.DESCENDING}
+    loanRequest=db.find_single_doc_with_desc_sort(constants.collectionName.loan_customer.name,expr,proj,sortExpr)
+    print(loanRequest)
+
+
 def editUserInfo(args):
-    expr = {constants.misc_webargs.USERNAME.name: {'$regex': generateExactMatchPattern(args[constants.misc_webargs.REFERRER_USERNAME.name]), '$options': 'i'}}
+    expr = {constants.misc_webargs.USERNAME.name: {
+        '$regex': generateExactMatchPattern(args[constants.misc_webargs.REFERRER_USERNAME.name]), '$options': 'i'}}
     cursor = db.find_docs(constants.collectionName.users.name, expr)
+    updt = {}
     role = None
     for val in cursor:
         role = val[constants.misc_webargs.ROLE.name]
 
     if role == constants.roles.ADMIN.name:
-        updt = {constants.misc_webargs.CREDIT_SCORE.name:args[constants.misc_webargs.CREDIT_SCORE.name],
-                constants.misc_webargs.DOCUMENT1_VER_STATUS.name:args[constants.misc_webargs.DOCUMENT1_VER_STATUS.name],
-                constants.misc_webargs.DOCUMENT2_VER_STATUS.name:args[constants.misc_webargs.DOCUMENT2_VER_STATUS.name]
-                }
+        if constants.misc_webargs.CREDIT_SCORE.name in args and \
+                args[constants.misc_webargs.CREDIT_SCORE.name] is not None:
+            updt["constants.misc_webargs.CREDIT_SCORE.name"] = args[constants.misc_webargs.CREDIT_SCORE.name]
+        if constants.misc_webargs.DOCUMENT1_VER_STATUS.name in args and \
+                args[constants.misc_webargs.DOCUMENT1_VER_STATUS.name] is not None:
+            updt["constants.misc_webargs.DOCUMENT1_VER_STATUS.name"] = args[
+                constants.misc_webargs.DOCUMENT1_VER_STATUS.name]
+        if constants.misc_webargs.DOCUMENT2_VER_STATUS.name in args and \
+                args[constants.misc_webargs.DOCUMENT2_VER_STATUS.name] is not None:
+            updt["constants.misc_webargs.DOCUMENT2_VER_STATUS.name"] = args[
+                constants.misc_webargs.DOCUMENT2_VER_STATUS.name]
     elif role == constants.roles.AGENT.name:
-        updt = {constants.misc_webargs.TIMEZONE.name: args[constants.misc_webargs.TIMEZONE.name]}
+        if constants.misc_webargs.TIMEZONE.name in args and args[constants.misc_webargs.TIMEZONE.name] is not None:
+            updt["constants.misc_webargs.TIMEZONE.name"] = args[constants.misc_webargs.TIMEZONE.name]
     else:
         return False
     try:
-        db.find_and_modify(constants.collectionName.users.name,expr,updt,False)
+        db.find_and_modify(constants.collectionName.users.name, expr, updt, False)
     except:
         return False
     return True
