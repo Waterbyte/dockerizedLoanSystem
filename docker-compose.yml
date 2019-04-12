@@ -1,0 +1,11 @@
+backendapi:
+  build: .
+  command: python /backendAPI/app_run.py
+  ports:
+    - "5000:5000"
+  volumes:
+    - dockerVolume:/backendApi
+  links:
+    - mongodb
+mongodb:
+  image: mongo:4.0
