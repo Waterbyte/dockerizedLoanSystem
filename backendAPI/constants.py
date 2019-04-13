@@ -17,6 +17,7 @@ class misc_webargs(Enum):
     DOCUMENT2_VER_STATUS = 14
     MONTHLY_INCOME = 15
     ANNUAL_INCOME = 16
+    INSERTED_ID = 17
 
 class response(Enum):
     VERDICT = 101
@@ -28,6 +29,7 @@ class collectionName(Enum):
     loan_inventory = 203
     loan_customer = 204
     counters = 205
+    loan_customer_counter = 206
 
 class roles(Enum):
     ADMIN = 301

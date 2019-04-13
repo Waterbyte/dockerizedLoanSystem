@@ -94,21 +94,21 @@ def listOtherUsers(role, username):
             constants.misc_webargs.ROLE.name: role}
     projection = {constants.misc_webargs.USERNAME.name: 1, "_id": 0}
     cursor = db.find_docs_projection(constants.collectionName.users.name, expr, projection)
-    list = []
+    listData = []
     for val in cursor:
         username = val[constants.misc_webargs.USERNAME.name]
-        list.append(username)
-    return list
+        listData.append(username)
+    return listData
 
 
 def listCustomers(username):
     expr = {constants.misc_webargs.AGENT_NAME.name: {'$regex': generateExactMatchPattern(username), '$options': 'i'}}
     cursor = db.find_docs(constants.collectionName.relations.name, expr)
-    list = []
+    listData = []
     for val in cursor:
         customer = val[constants.misc_webargs.CUSTOMER_NAME.name]
-        list.append(customer)
-    return list
+        listData.append(customer)
+    return listData
 
 
 # admin can see everybody, agents can see all admins, other agents and customers under them, finally customers can't see anybody
@@ -140,10 +140,10 @@ def listLoans():
         cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name, {}, projection)
     except:
         return utils.generate_db_error()
-    list = []
+    listData = []
     for val in cursor:
-        list.append(val)
-    return list
+        listData.append(val)
+    return listData
 
 
 def isCustomerAgentRelated(agentName, customerName):
@@ -177,9 +177,9 @@ def addLoan(args):
     if cust_emi_status == True:
         if is_Emi_Avail != True:
             return False
-
+    loan_cust_id = str(getCustomerLoanId())
     loan_doc = {
-        constants.loanCust.LOAN_CUST_ID.name: str(getCustomerLoanId()),
+        constants.loanCust.LOAN_CUST_ID.name: loan_cust_id,
         constants.misc_webargs.CUSTOMER_NAME.name: args[constants.misc_webargs.CUSTOMER_NAME.name],
         constants.misc_webargs.REFERRER_USERNAME.name: args[constants.misc_webargs.REFERRER_USERNAME.name],
         constants.loanCust.LOAN_INVT_ID.name: args[constants.loanCust.LOAN_INVT_ID.name],
@@ -192,7 +192,12 @@ def addLoan(args):
         constants.misc_webargs.TIMESTAMP.name: utils.generate_current_utc()
     }
     try:
-        db.insert_one_doc(constants.collectionName.loan_customer.name, loan_doc)
+        loan_inserted_id = db.insert_one_doc(constants.collectionName.loan_customer.name, loan_doc).inserted_id
+        loan_customer_counter_doc = {constants.loanCust.LOAN_CUST_ID.name: loan_cust_id,
+                                     constants.misc_webargs.INSERTED_ID.name: loan_inserted_id,
+                                     constants.misc_webargs.USERNAME.name: args[
+                                         constants.misc_webargs.CUSTOMER_NAME.name]}
+        db.insert_one_doc(constants.collectionName.loan_customer_counter.name, loan_customer_counter_doc)
     except Exception as e:
         print(e)
         return False
@@ -207,23 +212,22 @@ def viewLoansRequest(username):
         role = val[constants.misc_webargs.ROLE.name]
 
     if role == constants.roles.ADMIN.name:
-        expr = {}
+        expr = [{"$lookup": {"from": "loan_customer", "localField": "INSERTED_ID", "foreignField": "_id", "as": "R"}},
+         {"$project":{"R._id":0, "INSERTED_ID":0,"_id":0,"R.TIMESTAMP":0,"LOAN_CUST_ID":0,"USERNAME":0}},{"$unwind": "$R"}]
     elif role == constants.roles.AGENT.name:
-        expr = {constants.misc_webargs.REFERRER_USERNAME.name: username}
+        expr = [{"$lookup": {"from": "loan_customer", "localField": "INSERTED_ID", "foreignField": "_id", "as": "R"}},
+         {"$project":{"R._id":0, "INSERTED_ID":0,"_id":0,"R.TIMESTAMP":0,"LOAN_CUST_ID":0,"USERNAME":0}},{"$match":{"R.REFERRER_USERNAME":username}},{"$unwind": "$R"}]
     else:
-        expr = {constants.misc_webargs.CUSTOMER_NAME.name: username}
+        expr = [{"$lookup": {"from": "loan_customer", "localField": "INSERTED_ID", "foreignField": "_id", "as": "R"}},
+         {"$project":{"R._id":0, "INSERTED_ID":0,"_id":0,"R.TIMESTAMP":0,"LOAN_CUST_ID":0,"USERNAME":0}},{"$match":{"R.CUSTOMER_NAME":username}},{"$unwind": "$R"}]
 
-    list = []
-    projection = {"_id": 0}
-    try:
-        cursor = db.find_docs_projection(constants.collectionName.loan_inventory.name, expr, projection)
-    except:
-        return utils.generate_db_error()
+    listData = []
 
-    for val in cursor:
-        list.append(val)
 
-    return utils.generate_response(1, val)
+    req_coll = db.aggregate_db(constants.collectionName.loan_customer_counter.name, expr)
+    for val in list(req_coll):
+        listData.append(val)
+    return utils.generate_response(1, listData)
 
 
 def getCustomerLoanId():
@@ -233,23 +237,105 @@ def getCustomerLoanId():
 
 
 def editLoanRequest(args):
-    val = None
-    proj = {"_id": 0}
-    expr = {constants.loanCust.LOAN_CUST_ID.name:args[constants.loanCust.LOAN_CUST_ID.name]}
-    sortExpr = [(constants.misc_webargs.TIMESTAMP.name,pymongo.DESCENDING)]
-    loanRequest = db.find_single_doc_with_desc_sort(constants.collectionName.loan_customer.name, expr, proj, sortExpr)
-    for val in loanRequest:
-        print(val)
-    if constants.loanCust.LOAN_STATE.name in val and  val[constants.loanCust.LOAN_STATE.name] == constants.loanState.ACCEPTED.name:
+    # expr = {[{"$lookup": {"from": "loan_customer", "localField": "INSERTED_ID", "foreignField": "_id", "as": "R"}},
+    #      {"$unwind": "$R"},{"$project":{"R._id":0}}, {"$match":{"LOAN_CUST_ID":args[constants.loanCust.LOAN_CUST_ID.name]}}]}
+    # req_coll = db.aggregate_db(constants.collectionName.loan_customer_counter.name,expr)
+    # print (req_coll["LOAN_CUST_ID"])
+    # return False
+
+    ##   find id
+    expr = {constants.loanCust.LOAN_CUST_ID.name: args[constants.loanCust.LOAN_CUST_ID.name],
+            constants.misc_webargs.USERNAME.name: args[constants.misc_webargs.CUSTOMER_NAME.name]}
+    req_coll = db.find_docs(constants.collectionName.loan_customer_counter.name, expr)
+    inserted_id = None
+    if req_coll.count() == 0:
         return False
-    pass
+    inserted_id = utils.return_first_row(req_coll)[constants.misc_webargs.INSERTED_ID.name]
+
+    ## find loan
+    expr = {"_id": inserted_id, constants.loanCust.LOAN_STATE.name: constants.loanState.NEW.name}
+    projection = {"_id": 0}
+    req_coll = db.find_docs_projection(constants.collectionName.loan_customer.name, expr, projection)
+    if req_coll.count() == 0:
+        return False
+    data = utils.return_first_row(req_coll)
+    # we have data
+
+    ## find corresponding loan offer
+    expr = {constants.loanInv.ID.name: data[constants.loanCust.LOAN_INVT_ID.name]}
+    req_coll_2 = db.find_docs(constants.collectionName.loan_inventory.name, expr)
+    if req_coll_2.count() == 0:
+        return False
+    validation_data = utils.return_first_row(req_coll_2)
+    minimum_Amt = validation_data[constants.loanInv.MIN_AMT.name]
+    maximum_Amt = validation_data[constants.loanInv.MAX_AMT.name]
+    minimum_Dur = validation_data[constants.loanInv.MIN_DURATION.name]
+    maximum_Dur = validation_data[constants.loanInv.MAX_DURATION.name]
+
+    if constants.loanCust.AMT.name in args :
+        if args[constants.loanCust.AMT.name] != None and args[constants.loanCust.AMT.name] >= minimum_Amt and args[constants.loanCust.AMT.name] <= maximum_Amt:
+            data[constants.loanCust.AMT.name] = args[constants.loanCust.AMT.name]
+        else:
+            return False
+    if constants.loanCust.DURATION.name in args:
+        if args[constants.loanCust.DURATION.name] != None and args[
+        constants.loanCust.DURATION.name] >= minimum_Dur and args[constants.loanCust.DURATION.name] <= maximum_Dur:
+            data[constants.loanCust.DURATION.name] = args[constants.loanCust.DURATION.name]
+        else:
+            return False
+    if constants.loanCust.MANDATORY_REQUIREMENT1_LOC in args and args[
+        constants.loanCust.MANDATORY_REQUIREMENT1_LOC.name] != None:
+        data[constants.loanCust.MANDATORY_REQUIREMENT1_LOC.name] = args[
+            constants.loanCust.MANDATORY_REQUIREMENT1_LOC.name]
+    if constants.loanCust.MANDATORY_REQUIREMENT2_LOC.name in args and args[
+        constants.loanCust.MANDATORY_REQUIREMENT2_LOC.name] != None:
+        data[constants.loanCust.MANDATORY_REQUIREMENT2_LOC.name] = args[
+            constants.loanCust.MANDATORY_REQUIREMENT2_LOC.name]
+
+    ## insert loan with new data
+    data[constants.misc_webargs.TIMESTAMP.name] = utils.generate_current_utc()
+    inserted_id = db.insert_one_doc(constants.collectionName.loan_customer.name, data).inserted_id
+
+    ##update insert id
+    expr = {constants.loanCust.LOAN_CUST_ID.name: args[constants.loanCust.LOAN_CUST_ID.name]}
+    updt = {'$set': {constants.misc_webargs.INSERTED_ID.name: inserted_id}}
+    db.find_and_modify(constants.collectionName.loan_customer_counter.name, expr, updt, {})
+    return True
+
 
 def approveLoanRequest(args):
-    proj = {"_id": 0}
     expr = {constants.loanCust.LOAN_CUST_ID.name: args[constants.loanCust.LOAN_CUST_ID.name]}
-    sortExpr = {constants.misc_webargs.TIMESTAMP.name: pymongo.DESCENDING}
-    loanRequest=db.find_single_doc_with_desc_sort(constants.collectionName.loan_customer.name,expr,proj,sortExpr)
-    print(loanRequest)
+    req_coll = db.find_docs(constants.collectionName.loan_customer_counter.name, expr)
+    inserted_id = None
+    if req_coll.count() == 0:
+        return False
+    inserted_id = utils.return_first_row(req_coll)[constants.misc_webargs.INSERTED_ID.name]
+
+    ## find loan
+    expr = {"_id": inserted_id, constants.loanCust.LOAN_STATE.name: constants.loanState.NEW.name}
+    projection = {"_id": 0}
+    req_coll = db.find_docs_projection(constants.collectionName.loan_customer.name, expr, projection)
+    if req_coll.count() == 0:
+        return False
+    data = utils.return_first_row(req_coll)
+    # we have data
+
+    ## find corresponding loan offer
+    expr = {constants.loanInv.ID.name: data[constants.loanCust.LOAN_INVT_ID.name]}
+    req_coll_2 = db.find_docs(constants.collectionName.loan_inventory.name, expr)
+    if req_coll_2.count() == 0:
+        return False
+    validation_data = utils.return_first_row(req_coll_2)
+
+    data[constants.loanCust.LOAN_STATE.name] = args[constants.loanCust.LOAN_STATE.name]
+    data[constants.misc_webargs.TIMESTAMP.name] = utils.generate_current_utc()
+    inserted_id = db.insert_one_doc(constants.collectionName.loan_customer.name, data).inserted_id
+
+    ##update insert id
+    expr = {constants.loanCust.LOAN_CUST_ID.name: args[constants.loanCust.LOAN_CUST_ID.name]}
+    updt = {'$set': {constants.misc_webargs.INSERTED_ID.name: inserted_id}}
+    db.find_and_modify(constants.collectionName.loan_customer_counter.name, expr, updt, {})
+    return True
 
 
 def editUserInfo(args):

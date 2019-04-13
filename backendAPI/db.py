@@ -5,7 +5,7 @@ from flask import g
 
 def get_db_client():
     if 'dbcl' not in g:
-        g.dbcl = mc('mongodb://mongodb:27017/')
+        g.dbcl = mc('mongodb://localhost:27017/')
     return g.dbcl
 
 
@@ -75,3 +75,6 @@ def find_and_modify(coll,expr,updt,wantNew):
     cln = get_collection(coll)
     return cln.find_one_and_update(expr,updt,wantNew)
 
+def aggregate_db(coll,expr):
+    cln = get_collection(coll)
+    return cln.aggregate(expr)

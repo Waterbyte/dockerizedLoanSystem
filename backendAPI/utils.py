@@ -44,3 +44,7 @@ def generate_db_error():
 
 def generateExactMatchPattern(inpStr):
     return "^" + inpStr + "$"
+
+def return_first_row(data):
+    for unit in data:
+        return unit

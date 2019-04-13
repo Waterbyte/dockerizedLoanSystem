@@ -101,17 +101,17 @@ argsCreateLoanRequest = {
 
 }
 
-argsViewLoanRequest = argsLogin
+argsViewLoanRequest = argsListUser
 
 argsEditLoanRequest = {
     constants.misc_webargs.REFERRER_USERNAME.name: fields.Str(required=True, validate=validate.Length(min=1)),
     constants.misc_webargs.REFERRER_TOKEN.name: fields.Str(required=True),
+    constants.misc_webargs.CUSTOMER_NAME.name: fields.Str(required=True),
     constants.loanCust.LOAN_CUST_ID.name: fields.Str(required=True),
     constants.loanCust.AMT.name: fields.Int(),
     constants.loanCust.DURATION.name: fields.Int(),
     constants.loanCust.MANDATORY_REQUIREMENT1_LOC.name: fields.Str(),
     constants.loanCust.MANDATORY_REQUIREMENT2_LOC.name: fields.Str(),
-    constants.loanCust.EMI_CHOSEN.name: fields.Bool()
 }
 
 argsApproveLoanRequest = {
