@@ -5,7 +5,7 @@ from flask import g
 
 def get_db_client():
     if 'dbcl' not in g:
-        g.dbcl = mc('mongodb://localhost:27017/')
+        g.dbcl = mc('mongodb://mongodb:27017/')
     return g.dbcl
 
 

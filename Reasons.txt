@@ -7,6 +7,8 @@ Authentication mechanism:
     salted and hashed in server. In return of this api call, a token is given to the user. For subsequent request by the user, till logout, this token needs to be present in all the api calls for
     them to succeed.
 
+    I learned that JWT is  much better for authentication here.
+
 Hierarchy of user-roles:
     I am assuming following hierarchy:
     1. Admins can see all agents and other admins if any.
