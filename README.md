@@ -1,6 +1,6 @@
 The backend is made with Python Flask and the default development server. Webargs are used for argument parsing and Flask_restful for routing.
-
 Mongodb is used as a database.
+Docker is used for deployment. 
 
 Features:
 1. List, view and edit users -  this can only be done by "agent" and "admin" roles
@@ -9,4 +9,5 @@ Features:
 4. Edit a loan (but not after it has been approved) -  This can be done only by "agent" role. But cannot be done if loan is in "Approved" state.
 5. Ability to list and view loans (approved) or loan requests based on the filter applied. "customer" can only see his own loans...while "agent" and "admin" can see everyone's loans. 
  
+To run this hit a post request at localhost:5000/oneTimeSetup. It will create a superadmin for testing purposes and create a loan object in db.
 
